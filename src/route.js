@@ -3,8 +3,12 @@ const db = require('./db');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  res.send('<h1>Welcome to the krfox-url-shortener</h1>')
-})
+  res.send('<h1>Welcome to the krfox-url-shortener</h1>');
+});
+
+router.get('/ping', (req, res) => {
+  res.send('Pong');
+});
 
 router.get('/sorry', (req, res) => {
   res.redirect('https://krfox.ru');
