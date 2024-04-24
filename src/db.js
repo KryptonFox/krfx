@@ -1,7 +1,14 @@
 const db = require('better-sqlite3')('./db.sqlite');
 
 db.prepare(
-  'CREATE TABLE IF NOT EXISTS shortlinks (id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL, shortname TEXT UNIQUE, url TEXT);',
+  `CREATE TABLE IF NOT EXISTS shortlinks (
+    id        INTEGER PRIMARY KEY AUTOINCREMENT
+                      UNIQUE
+                      NOT NULL,
+    shortname TEXT    UNIQUE
+                      NOT NULL,
+    url       TEXT    NOT NULL
+);`,
 ).run();
 
 function getUrl(shortname) {

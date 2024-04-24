@@ -6,7 +6,7 @@ const api = express.Router();
 const { blacklist, charset } = JSON.parse(fs.readFileSync('./config.json'));
 
 // functions
-const rand = () => Math.floor(Math.random() * (charset.lenght - 1));
+const rand = () => Math.floor(Math.random() * (charset.length - 1));
 
 function isValidURL(url) {
   try {
