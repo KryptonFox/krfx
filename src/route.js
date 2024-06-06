@@ -3,7 +3,7 @@ const db = require('./db');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  res.status(308).redirect('https://krfox.ru/url-shortener')
+  res.status(308).redirect('https://krfox.ru/url-shortener');
 });
 
 router.get('/ping', (req, res) => {
@@ -11,7 +11,7 @@ router.get('/ping', (req, res) => {
 });
 
 router.get('/sorry', (req, res) => {
-  res.status(404).send('Такой ссылки не существует!')
+  res.status(404).send('Такой ссылки не существует!');
 });
 
 router.get('/krfox', (req, res) => {
@@ -19,7 +19,8 @@ router.get('/krfox', (req, res) => {
 });
 
 router.get('/:url', (req, res) => {
-  if (db.getUrl(req.params.url)) res.status(301).redirect(db.getUrl(req.params.url));
+  if (db.getUrl(req.params.url.toLowerCase()))
+    res.status(301).redirect(db.getUrl(req.params.url.toLowerCase()));
   else res.status(301).redirect('/sorry');
 });
 

@@ -36,7 +36,7 @@ api.get('/', (req, res) => {
 api
   .route('/shortlink')
   .put((req, res) => {
-    let shortname = req.query.shortname;
+    let shortname = req.query.shortname.toLowerCase();
     // validate shortname
     if (shortname) {
       if (

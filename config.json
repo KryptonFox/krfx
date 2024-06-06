@@ -1,5 +1,5 @@
 {
   "port": 3000,
   "blacklist": ["api", "krfox", "sorry"],
-  "charset": "QWERTYUIOPASDFGHJKLZXCVBNM0123456789qwertyuiopasdfghjklzxcvbnm"
+  "charset": "0123456789qwertyuiopasdfghjklzxcvbnm-_"
 }
