@@ -41,14 +41,18 @@ api
     if (shortname) {
       if (
         shortname.length < 2 ||
-        blacklist.includes(shortname) ||
-        db.getUrl(shortname)
-      ) {
+        blacklist.includes(shortname)
+      )
         return res.send({
           status: 'Error: shortname is invalid',
           code: 221,
         });
-      }
+
+      if (db.getUrl(shortname))
+        return res.send({
+          status: 'Error: this shortname is taken',
+          code: 224,
+        });
     } else {
       shortname = generateName();
     }
