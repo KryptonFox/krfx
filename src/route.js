@@ -19,7 +19,7 @@ router.get('/krfox', (req, res) => {
 });
 
 router.get('/:url', (req, res) => {
-  if (db.getUrl(req.params.url.toLowerCase()))
+  if (db.getUrl(req.params.url?.toLowerCase()))
     res.status(301).redirect(db.getUrl(req.params.url.toLowerCase()));
   else res.status(301).redirect('/sorry');
 });

@@ -36,7 +36,7 @@ api.get('/', (req, res) => {
 api
   .route('/shortlink')
   .put((req, res) => {
-    let shortname = req.query.shortname.toLowerCase();
+    let shortname = req.query.shortname?.toLowerCase();
     // validate shortname
     if (shortname) {
       if (
@@ -68,7 +68,7 @@ api
     });
   })
   .get((req, res) => {
-    const url = db.getUrl(req.query.shortname);
+    const url = db.getUrl(req.query.shortname?.toLowerCase());
     if (url) res.send({ status: 'URL is found!', code: 200, url: url });
     else res.send({ status: 'URL is not found!', code: 223 });
   })
