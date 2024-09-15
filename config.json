@@ -1,0 +1,11 @@
+{
+  "linkName": {
+    "validator": {
+      "minLength": 3
+    },
+    "generator": {
+      "length": 3,
+      "charset": "0123456789qwertyuiopasdfghjklzxcvbnm-_"
+    }
+  }
+}
