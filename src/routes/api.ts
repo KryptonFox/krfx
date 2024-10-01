@@ -15,7 +15,7 @@ api.post('/create', async (c) => {
     })
   }
   // get url and name
-  const url = new URL(data.data.url).toString()
+  const url = data.data.url
   let name = data.data.name
   if (!name) {
     // generate name
