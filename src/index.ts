@@ -3,10 +3,13 @@ import { Hono } from 'hono'
 import api from './routes/api'
 import { prettyJSON } from 'hono/pretty-json'
 import link from './routes/link'
+import { cors } from 'hono/cors'
 
 const app = new Hono()
 
 app.use(prettyJSON({ space: 2 }))
+app.use(cors())
+
 app.route('/', api)
 app.route('/', link)
 
