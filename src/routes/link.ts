@@ -3,8 +3,6 @@ import prisma from '../../prisma/prisma'
 
 const link = new Hono()
 
-link.get('/', (c) => c.redirect('https://web.krfx.ru'))
-
 link.get('/:link', async (c) => {
   const link = c.req.param('link')?.trim().toLowerCase()
   if (!link) {

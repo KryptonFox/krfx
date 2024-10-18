@@ -1,11 +1,11 @@
 import { Hono } from 'hono'
-import LinkCreate from '../schemas/linkCreate'
-import prisma from '../../prisma/prisma'
-import generateLinkName from '../lib/generateLinkName'
+import LinkCreate from '@/schemas/linkCreate'
+import prisma from '@@/prisma/prisma'
+import generateLinkName from '@/lib/generateLinkName'
 
-const api = new Hono().basePath('/api')
+const create = new Hono()
 
-api.post('/create', async (c) => {
+create.post('/', async (c) => {
   // validating
   const data = await LinkCreate.safeParseAsync(await c.req.json())
   if (!data.success) {
@@ -36,4 +36,4 @@ api.post('/create', async (c) => {
   })
 })
 
-export default api
+export default create
