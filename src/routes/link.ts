@@ -12,7 +12,11 @@ link.get('/:link', async (c) => {
   if (!linkRec) {
     return c.text('Link is not found')
   }
-  return c.redirect(linkRec.url)
+  if (linkRec.type === 'FILE') {
+    return fetch(linkRec.url)
+  } else {
+    return c.redirect(linkRec.url)
+  }
 })
 
 export default link

@@ -16,7 +16,13 @@ datasource db {
 model Link {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   url         String
+  type        Type
   name        String   @unique
   displayName String   @unique
   createdAt   DateTime @default(now())
+}
+
+enum Type {
+  LINK
+  FILE
 }

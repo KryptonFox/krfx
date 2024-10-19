@@ -1,6 +1,5 @@
 import { z } from 'zod'
-import prisma from '../../prisma/prisma'
-import { linkName } from '../../config.json'
+import Name from '@/schemas/name'
 
 const LinkCreate = z.object({
   url: z
@@ -8,16 +7,7 @@ const LinkCreate = z.object({
     .trim()
     .url('URL is invalid')
     .transform((url: string) => new URL(url).toString()),
-  name: z
-    .string()
-    .trim()
-    .min(linkName.validator.minLength, 'The name is too short')
-    .regex(/^[0-9a-zA-Z_\-]+$/gm, 'Restricted characters')
-    .refine(async (val: string) => {
-      return !(await prisma.link.findUnique({ where: { name: val } }))
-    }, 'Name is used')
-    .optional()
-    .or(z.literal('')),
+  name: Name,
 })
 
 export default LinkCreate

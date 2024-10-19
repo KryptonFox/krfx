@@ -25,6 +25,7 @@ create.post('/', async (c) => {
   await prisma.link.create({
     data: {
       url: url,
+      type: 'LINK',
       displayName: name,
       name: name.toLowerCase(),
     },
