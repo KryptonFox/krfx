@@ -1,7 +1,12 @@
 {
   "linkName": {
     "validator": {
-      "minLength": 3
+      "minLength": 3,
+      "blacklist": [
+        "resources",
+        "home",
+        "sorry"
+      ]
     },
     "generator": {
       "length": 3,

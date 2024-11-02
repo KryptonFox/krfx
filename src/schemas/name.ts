@@ -8,7 +8,10 @@ const Name = z
   .min(linkName.validator.minLength, 'The name is too short')
   .regex(/^[0-9a-zA-Z_\-]+$/gm, 'Restricted characters')
   .refine(async (val: string) => {
-    return !(await prisma.link.findUnique({ where: { name: val } }))
+    return (
+      !linkName.validator.blacklist.includes(val) &&
+      !(await prisma.link.findUnique({ where: { name: val } }))
+    )
   }, 'Name is used')
   .or(z.literal(''))
   .optional()
