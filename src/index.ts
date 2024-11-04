@@ -1,17 +1,18 @@
-import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
-import { prettyJSON } from 'hono/pretty-json'
+import { serve } from '@hono/node-server'
 import { cors } from 'hono/cors'
-import routes from '@/routes'
 import { logger } from 'hono/logger'
+import { prettyJSON } from 'hono/pretty-json'
+import { trimTrailingSlash } from 'hono/trailing-slash'
 import 'dotenv/config'
-import * as process from 'node:process'
+import routes from '@/routes'
 
 const app = new Hono()
 
 app.use(prettyJSON({ space: 2 }))
 app.use(cors())
 app.use(logger())
+app.use(trimTrailingSlash())
 
 app.route('/', routes)
 
