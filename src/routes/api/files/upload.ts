@@ -13,7 +13,7 @@ upload.post('/', async (c) => {
   try {
     data = await c.req.formData()
   } catch (e) {
-    return c.json({ success: false, error: 'FormData not found' })
+    return c.json({ success: false, error: 'FormData not found' }, 400)
   }
   // validate data
   const validatedData = await FileUpload.safeParseAsync({
@@ -30,6 +30,7 @@ upload.post('/', async (c) => {
 
   const name = validatedData.data.name || (await generateLinkName())
   const fileExt = validatedData.data.file.name.split('.').at(-1)
+  const fileName = `${name}.${fileExt}`
   const url = new URL(`${name}.${fileExt}`, process.env.CDN_URL).toString()
   const hash = createHash('md5')
     .update(new Uint8Array(await validatedData.data.file.arrayBuffer()))
@@ -57,10 +58,11 @@ upload.post('/', async (c) => {
   await s3Client.send(
     new PutObjectCommand({
       Bucket: 'krfx-storage',
-      Key: `${name}.${fileExt}`,
+      Key: fileName,
       Body: new Uint8Array(await validatedData.data.file.arrayBuffer()),
       ContentMD5: hash,
       ContentType: validatedData.data.file.type,
+      ContentDisposition: `inline; filename="${fileName}"`,
     }),
   )
   // response
