@@ -1,9 +1,8 @@
 import { Hono } from 'hono'
-import links from '@/routes/api/links'
-import files from '@/routes/api/files'
+import record from './record'
 
 const api = new Hono()
-api.route('/links', links)
-api.route('/files', files)
+
+api.route('/record', record)
 
 export default api

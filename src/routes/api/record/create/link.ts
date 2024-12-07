@@ -1,11 +1,11 @@
 import { Hono } from 'hono'
 import LinkCreate from '@/schemas/linkCreate'
-import prisma from '@@/prisma/prisma'
 import generateLinkName from '@/lib/generateLinkName'
+import prisma from '@@/prisma/prisma'
 
-const create = new Hono()
+const route = new Hono()
 
-create.post('/', async (c) => {
+route.post('/', async (c) => {
   // validating
   const data = await LinkCreate.safeParseAsync(await c.req.json())
   if (!data.success) {
@@ -22,14 +22,20 @@ create.post('/', async (c) => {
     name = await generateLinkName()
   }
   // db writing
-  await prisma.link.create({
+  await prisma.record.create({
     data: {
-      url: url,
-      type: 'LINK',
-      displayName: name,
       name: name.toLowerCase(),
+      displayName: name,
+      ownerType: 'ANONYMOUS',
+      type: 'LINK',
+      link: {
+        create: {
+          url,
+        },
+      },
     },
   })
+
   // return
   return c.json({
     success: true,
@@ -37,4 +43,4 @@ create.post('/', async (c) => {
   })
 })
 
-export default create
+export default route

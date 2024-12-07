@@ -1,13 +1,13 @@
 import { Hono } from 'hono'
 import FileUpload from '@/schemas/fileUpload'
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import generateLinkName from '@/lib/generateLinkName'
 import prisma from '@@/prisma/prisma'
 import { createHash } from 'node:crypto'
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
-const upload = new Hono()
+const route = new Hono()
 
-upload.post('/', async (c) => {
+route.post('/', async (c) => {
   // get data
   let data
   try {
@@ -28,6 +28,7 @@ upload.post('/', async (c) => {
     })
   }
 
+  // const
   const name = validatedData.data.name || (await generateLinkName())
   const fileExt = validatedData.data.file.name.split('.').at(-1)
   const fileName = `${name}.${fileExt}`
@@ -37,12 +38,20 @@ upload.post('/', async (c) => {
     .digest('base64')
 
   // db writing
-  await prisma.link.create({
+  await prisma.record.create({
     data: {
-      url: url,
-      type: 'FILE',
-      displayName: name,
       name: name.toLowerCase(),
+      displayName: name,
+      ownerType: 'ANONYMOUS',
+      type: 'FILE',
+      file: {
+        create: {
+          filename: validatedData.data.file.name,
+          hash,
+          mimeType: validatedData.data.file.type,
+          cdnUrl: url,
+        },
+      },
     },
   })
 
@@ -73,4 +82,4 @@ upload.post('/', async (c) => {
   })
 })
 
-export default upload
+export default route

@@ -1,9 +1,5 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,16 +9,59 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Link {
+model User {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  username String   @unique
+  password String
+  role     UserRole @default(USER)
+  records  Record[]
+}
+
+model Record {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  url         String
-  type        Type
   name        String   @unique
   displayName String   @unique
   createdAt   DateTime @default(now())
+
+  ownerType RecordOwnerType
+  ownerId   String?         @db.ObjectId
+  owner     User?           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  type RecordType
+  file File?
+  link Link?
 }
 
-enum Type {
+model File {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  filename String
+  hash     String
+  mimeType String
+  cdnUrl   String
+
+  recordId String @unique @db.ObjectId
+  record   Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+}
+
+model Link {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  url String
+
+  recordId String @unique @db.ObjectId
+  record   Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+}
+
+enum RecordType {
   LINK
   FILE
+}
+
+enum RecordOwnerType {
+  DEFAULT
+  ANONYMOUS
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }

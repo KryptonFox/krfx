@@ -5,17 +5,18 @@ const link = new Hono()
 
 link.get('/:link', async (c) => {
   const link = c.req.param('link')?.trim().toLowerCase()
-  if (!link) {
-    return c.text('Link name is required')
-  }
-  const linkRec = await prisma.link.findUnique({ where: { name: link } })
-  if (!linkRec) {
-    return c.text('Link is not found')
-  }
-  if (linkRec.type === 'FILE') {
-    return fetch(linkRec.url)
-  } else {
-    return c.redirect(linkRec.url)
+  if (!link) return c.text('Link name is required', 400)
+
+  const linkRec = await prisma.record.findUnique({
+    where: { name: link },
+    include: { file: true, link: true },
+  })
+  if (!linkRec) return c.text('Link is not found', 404)
+
+  if (linkRec.type === 'FILE' && linkRec.file) {
+    return fetch(linkRec.file.cdnUrl)
+  } else if (linkRec.type === 'LINK' && linkRec.link) {
+    return c.redirect(linkRec.link.url)
   }
 })
 

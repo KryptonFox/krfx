@@ -10,7 +10,7 @@ const Name = z
   .refine(async (val: string) => {
     return (
       !linkName.validator.blacklist.includes(val) &&
-      !(await prisma.link.findUnique({ where: { name: val } }))
+      !(await prisma.record.findUnique({ where: { name: val } }))
     )
   }, 'Name is used')
   .or(z.literal(''))
