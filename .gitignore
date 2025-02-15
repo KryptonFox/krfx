@@ -1,0 +1,14 @@
+# IDE settings
+.idea
+.vscode
+
+# Cargo
+target
+Cargo.lock
+
+# Environment vars
+.env
+
+# Databases
+*.sqlite
+*.db

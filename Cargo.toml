@@ -1,0 +1,10 @@
+[package]
+name = "krfx-rust"
+version = "3.0.0"
+edition = "2021"
+
+[workspace]
+members = [".", "api", "entity", "migration"]
+
+[dependencies]
+api = { path = "api" }

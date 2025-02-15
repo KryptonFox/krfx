@@ -1,0 +1,68 @@
+use crate::record::name::{generate_name, validate_name};
+use crate::types::AppState;
+use crate::utlis::get_user_id_from_cookie;
+use actix_web::{error, post, web, HttpRequest, HttpResponse, Responder};
+use chrono::Utc;
+use entity::prelude::Record;
+use entity::record;
+use k_snowflake::Snowflake;
+use sea_orm::ActiveValue::Set;
+use sea_orm::{EntityTrait, TryIntoModel};
+use serde::Deserialize;
+use serde_json::json;
+use url::Url;
+
+#[derive(Debug, Deserialize, Clone)]
+struct CreateLinkPayload {
+    url: String,
+    name: Option<String>,
+}
+
+#[post("/create_link")]
+pub async fn create_link(
+    state: web::Data<AppState>,
+    payload: web::Json<CreateLinkPayload>,
+    req: HttpRequest,
+) -> error::Result<impl Responder> {
+    // validate or generate name
+    let name = match &payload.name {
+        Some(name) => validate_name(&state.conn, name.to_string()).await?,
+        None => generate_name(&state.conn).await,
+    };
+    // validate URL
+    let url = match Url::parse(&payload.url) {
+        Ok(url) => url.to_string(),
+        Err(_) => {
+            return Ok(HttpResponse::BadRequest().json(json!({
+                "type":"url",
+                "msg":"Invalid URL",
+            })))
+        }
+    };
+    // set owner id if user authorized else record will be anonymous
+    let owner_id = get_user_id_from_cookie(&req, &state);
+
+    // write to database
+    let record = record::ActiveModel {
+        id: Set(Snowflake::new(state.env.instance, 0).to_decimal().unwrap()),
+        owner_id: Set(owner_id),
+        name: Set(name.to_lowercase()),
+        visible_name: Set(name.clone()),
+        created_at: Set(Utc::now().naive_utc()),
+        url: Set(url),
+        is_file: Set(false),
+        hash: Set(None),
+        mime_type: Set(None),
+    };
+    let start = std::time::Instant::now();
+    Record::insert(record.clone())
+        .exec(&state.conn)
+        .await
+        .map_err(|_| error::ErrorInternalServerError("Error during database insert"))?;
+    println!("Insert time: {:?}", start.elapsed());
+    Ok(
+        HttpResponse::Ok().json(record.try_into_model().map_err(|_| {
+            error::ErrorInternalServerError("Error generating response, but file writed")
+        })?),
+    )
+}
