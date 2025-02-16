@@ -76,7 +76,7 @@ pub async fn upload(
         })?;
 
     // create url to file
-    let cdn_url = Url::parse(&state.env.cdn_url).and_then("Invalid cdn url in env");
+    let cdn_url = Url::parse(&state.env.cdn_url).expect("Invalid cdn url in env");
     let file_url = cdn_url
         .join(
             format!("{}.{}", name, file_ext.unwrap_or_else(|| "txt".to_string()))
