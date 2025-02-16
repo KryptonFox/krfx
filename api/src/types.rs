@@ -16,6 +16,7 @@ pub struct Environment {
     pub secret: String,
     pub salt: String,
     pub bucket_name: String,
+    pub cdn_url: String,
 }
 
 #[derive(Clone, Serialize, Deserialize)]

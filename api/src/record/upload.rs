@@ -13,6 +13,7 @@ use k_snowflake::Snowflake;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{EntityTrait, TryIntoModel};
 use std::io::Read;
+use url::Url;
 
 #[derive(Debug, MultipartForm)]
 struct UploadForm {
@@ -74,6 +75,16 @@ pub async fn upload(
             error::ErrorInternalServerError(format!("Unable to upload file\n{}", err))
         })?;
 
+    // create url to file
+    let cdn_url = Url::parse(&state.env.cdn_url).and_then("Invalid cdn url in env");
+    let file_url = cdn_url
+        .join(
+            format!("{}.{}", name, file_ext.unwrap_or_else(|| "txt".to_string()))
+                .to_lowercase()
+                .as_str(),
+        )
+        .unwrap();
+
     // write to database
     let record = record::ActiveModel {
         id: Set(Snowflake::new(state.env.instance, 0).to_decimal().unwrap()),
@@ -81,11 +92,7 @@ pub async fn upload(
         name: Set(name.to_lowercase()),
         visible_name: Set(name.clone()),
         created_at: Set(Utc::now().naive_utc()),
-        url: Set(format!(
-            "https://cdn.krfx.ru/{}.{}",
-            name.to_lowercase(),
-            file_ext.unwrap_or_else(|| "txt".to_string())
-        )),
+        url: Set(file_url.to_string()),
         is_file: Set(true),
         hash: Set(Some(format!("{:x}", digest))),
         mime_type: Set(mime_type),
