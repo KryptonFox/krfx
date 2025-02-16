@@ -11,8 +11,10 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(User::Table)
                     .col(big_integer(User::Id).primary_key())
-                    .col(string(User::Username).not_null().unique_key())
-                    .col(string(User::Password).not_null())
+                    .col(string(User::Username).unique_key())
+                    .col(string(User::DisplayName))
+                    .col(date_time(User::CreatedAt))
+                    .col(string(User::Password))
                     .to_owned(),
             )
             .await
@@ -30,5 +32,7 @@ enum User {
     Table,
     Id,
     Username,
+    DisplayName,
+    CreatedAt,
     Password,
 }

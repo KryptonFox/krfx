@@ -23,7 +23,7 @@ pub async fn login(state: web::Data<AppState>, payload: web::Json<LoginPayload>)
 
     // find user
     let Ok(Some(user)) = User::find()
-        .filter(user::Column::Username.eq(&payload.username))
+        .filter(user::Column::Username.eq(&payload.username.to_lowercase()))
         .filter(user::Column::Password.eq(&password_hash))
         .one(&state.conn)
         .await

@@ -9,6 +9,8 @@ pub struct Model {
     pub id: i64,
     #[sea_orm(unique)]
     pub username: String,
+    pub display_name: String,
+    pub created_at: DateTime,
     pub password: String,
 }
 
