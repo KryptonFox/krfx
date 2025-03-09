@@ -1,5 +1,6 @@
 use crate::auth::create_token::create_token;
 use crate::types::AppState;
+use crate::utlis::string_hash_sha256;
 use actix_web::cookie::Cookie;
 use actix_web::{post, web, HttpResponse, Responder};
 use chrono::Utc;
@@ -9,7 +10,6 @@ use k_snowflake::Snowflake;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::Deserialize;
-use sha2::{Digest, Sha256};
 
 #[derive(Deserialize)]
 struct SignupPayload {
@@ -31,9 +31,7 @@ pub async fn signup(
         HttpResponse::BadRequest().body("Username already exists");
     }
     // hash password
-    let mut hasher = Sha256::new();
-    hasher.update((payload.password.clone() + &state.env.salt).as_bytes());
-    let password_hash = format!("{:x}", hasher.finalize());
+    let password_hash = string_hash_sha256(&payload.password, &state.env.salt);
 
     // write user in db
     let user = user::ActiveModel {

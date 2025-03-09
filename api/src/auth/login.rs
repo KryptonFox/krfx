@@ -1,12 +1,12 @@
+use crate::auth::create_token::create_token;
 use crate::types::AppState;
-use actix_web::{post, web, HttpResponse, Responder};
+use crate::utlis::string_hash_sha256;
 use actix_web::cookie::Cookie;
+use actix_web::{post, web, HttpResponse, Responder};
 use entity::prelude::User;
 use entity::user;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::Deserialize;
-use sha2::{Digest, Sha256};
-use crate::auth::create_token::create_token;
 
 #[derive(Deserialize)]
 struct LoginPayload {
@@ -17,9 +17,7 @@ struct LoginPayload {
 #[post("/login")]
 pub async fn login(state: web::Data<AppState>, payload: web::Json<LoginPayload>) -> impl Responder {
     // hash password
-    let mut hasher = Sha256::new();
-    hasher.update(&payload.password.as_bytes());
-    let password_hash = format!("{:x}", hasher.finalize());
+    let password_hash = string_hash_sha256(&payload.password, &state.env.salt);
 
     // find user
     let Ok(Some(user)) = User::find()
