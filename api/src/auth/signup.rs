@@ -6,7 +6,7 @@ use actix_web::{post, web, HttpResponse, Responder};
 use chrono::Utc;
 use entity::prelude::User;
 use entity::user;
-use k_snowflake::Snowflake;
+use k_snowflake::create_snowflake;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::Deserialize;
@@ -35,7 +35,7 @@ pub async fn signup(
 
     // write user in db
     let user = user::ActiveModel {
-        id: Set(Snowflake::new(state.env.instance, 0).to_decimal().unwrap()),
+        id: Set(create_snowflake().to_decimal()),
         username: Set(payload.username.to_lowercase()),
         display_name: Set(payload.username.clone()),
         created_at: Set(Utc::now().naive_utc()),

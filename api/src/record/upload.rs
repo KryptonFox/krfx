@@ -9,7 +9,7 @@ use base64::Engine;
 use chrono::Utc;
 use entity::prelude::Record;
 use entity::record;
-use k_snowflake::Snowflake;
+use k_snowflake::create_snowflake;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{EntityTrait, TryIntoModel};
 use std::io::Read;
@@ -87,7 +87,7 @@ pub async fn upload(
 
     // write to database
     let record = record::ActiveModel {
-        id: Set(Snowflake::new(state.env.instance, 0).to_decimal().unwrap()),
+        id: Set(create_snowflake().to_decimal()),
         owner_id: Set(owner_id),
         name: Set(name.to_lowercase()),
         visible_name: Set(name.clone()),
