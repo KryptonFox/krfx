@@ -26,7 +26,6 @@ pub struct Environment {
     pub host: String,
     pub port: u16,
     pub database_url: String,
-    pub instance: u16,
     pub secret: String,
     pub salt: String,
     pub bucket_name: String,
