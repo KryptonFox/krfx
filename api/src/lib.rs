@@ -14,7 +14,6 @@ use actix_cors::Cors;
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::{middleware::Logger, web, App, HttpResponse, HttpServer};
 use env_logger::Env;
-use migration::{Migrator, MigratorTrait};
 
 fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(web::redirect("/", "https://web.krfx.ru").permanent());
@@ -31,25 +30,13 @@ fn api_config(cfg: &mut web::ServiceConfig) {
     );
 }
 
-async fn app_state(env: &Environment) -> AppState {
-    // connect db
-    let conn = sea_orm::Database::connect(&env.database_url).await.unwrap();
-    Migrator::up(&conn, None).await.unwrap();
-
-    // return AppState
-    AppState {
-        conn,
-        env: env.clone(),
-    }
-}
-
 #[actix_web::main]
 async fn start() -> std::io::Result<()> {
     dotenvy::dotenv().ok();
     env_logger::init_from_env(Env::default().default_filter_or("info"));
-    let env = envy::from_env::<Environment>().ok().unwrap();
 
-    let state = app_state(&env).await;
+    let env = envy::from_env::<Environment>().ok().unwrap();
+    let state = AppState::new(&env).await;
 
     HttpServer::new(move || {
         let cors = Cors::permissive(); // TODO normal CORS for production
