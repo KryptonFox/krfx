@@ -1,6 +1,6 @@
 use crate::record::name::{generate_name, validate_name};
 use crate::types::AppState;
-use crate::utlis::get_user_id_from_cookie;
+use crate::utils::get_user_id_from_cookie;
 use actix_multipart::form::{tempfile::TempFile, text::Text, MultipartForm};
 use actix_web::{error, post, web, HttpRequest, HttpResponse, Responder};
 use aws_sdk_s3::primitives::{ByteStream, SdkBody};

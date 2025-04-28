@@ -1,6 +1,6 @@
 use crate::auth::create_token::create_token;
 use crate::types::AppState;
-use crate::utlis::string_hash_sha256;
+use crate::utils::string_hash_sha256;
 use actix_web::cookie::Cookie;
 use actix_web::{post, web, HttpResponse, Responder};
 use chrono::Utc;

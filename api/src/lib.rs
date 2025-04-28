@@ -2,7 +2,7 @@ mod auth;
 mod link;
 mod record;
 mod types;
-mod utlis;
+mod utils;
 
 use crate::auth::login::login;
 use crate::auth::signup::signup;
