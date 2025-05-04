@@ -68,6 +68,7 @@ pub async fn upload(
                 .unwrap_or_else(|| "application/octet-stream".to_string()),
         )
         .content_md5(BASE64_STANDARD.encode(digest.as_ref()))
+        .content_disposition("inline")
         .send()
         .await
         .map_err(|err| {
