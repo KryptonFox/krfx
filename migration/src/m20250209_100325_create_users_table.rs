@@ -15,6 +15,7 @@ impl MigrationTrait for Migration {
                     .col(string(User::DisplayName))
                     .col(date_time(User::CreatedAt))
                     .col(string(User::Password))
+                    .col(boolean(User::IsAdmin).default(false))
                     .to_owned(),
             )
             .await
@@ -35,4 +36,5 @@ enum User {
     DisplayName,
     CreatedAt,
     Password,
+    IsAdmin,
 }

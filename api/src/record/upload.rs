@@ -97,6 +97,7 @@ pub async fn upload(
         is_file: Set(true),
         hash: Set(Some(format!("{:x}", digest))),
         mime_type: Set(mime_type),
+        ..Default::default()
     };
 
     Record::insert(record.clone())

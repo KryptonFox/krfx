@@ -50,9 +50,7 @@ pub async fn create_link(
         visible_name: Set(name.clone()),
         created_at: Set(Utc::now().naive_utc()),
         url: Set(url),
-        is_file: Set(false),
-        hash: Set(None),
-        mime_type: Set(None),
+        ..Default::default()
     };
     let start = std::time::Instant::now();
     Record::insert(record.clone())

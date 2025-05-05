@@ -17,9 +17,11 @@ impl MigrationTrait for Migration {
                     .col(string_uniq(Record::VisibleName))
                     .col(date_time(Record::CreatedAt))
                     .col(string(Record::Url))
-                    .col(boolean(Record::IsFile))
+                    .col(boolean(Record::IsFile).default(false))
                     .col(string_null(Record::Hash))
                     .col(string_null(Record::MimeType))
+                    .col(boolean(Record::IsTemp).default(false))
+                    .col(date_time_null(Record::ExpiresAt))
                     .foreign_key(
                         ForeignKey::create()
                             .from(Record::Table, Record::OwnerId)
@@ -58,4 +60,7 @@ enum Record {
     // file specific
     Hash,
     MimeType,
+    // temp records
+    IsTemp,
+    ExpiresAt,
 }

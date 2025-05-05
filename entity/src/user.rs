@@ -12,6 +12,7 @@ pub struct Model {
     pub display_name: String,
     pub created_at: DateTime,
     pub password: String,
+    pub is_admin: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

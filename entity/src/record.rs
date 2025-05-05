@@ -18,6 +18,8 @@ pub struct Model {
     pub is_file: bool,
     pub hash: Option<String>,
     pub mime_type: Option<String>,
+    pub is_temp: bool,
+    pub expires_at: Option<DateTime>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
