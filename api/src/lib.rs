@@ -50,7 +50,7 @@ async fn start() -> std::io::Result<()> {
             .app_data(MultipartFormConfig::default().total_limit(100 * 1024 * 1024))
             .app_data(web::Data::new(awc::Client::default()))
     })
-    .bind((env.host.as_str(), env.port))?
+    .bind((env.host.unwrap_or("127.0.0.1".to_string()).as_str(), env.port.unwrap_or(3000u16)))?
     .run()
     .await
 }

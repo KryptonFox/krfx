@@ -23,8 +23,8 @@ impl AppState {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Environment {
-    pub host: String,
-    pub port: u16,
+    pub host: Option<String>,
+    pub port: Option<u16>,
     pub database_url: String,
     pub secret: String,
     pub salt: String,
