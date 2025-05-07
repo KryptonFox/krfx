@@ -1,5 +1,6 @@
 mod auth;
 mod link;
+mod middlewares;
 mod record;
 mod types;
 mod utils;
@@ -7,11 +8,13 @@ mod utils;
 use crate::auth::login::login;
 use crate::auth::signup::signup;
 use crate::link::link_service;
+use crate::middlewares::auth_middleware;
 use crate::record::create_link::create_link;
 use crate::record::upload::upload;
 use crate::types::{AppState, Environment};
 use actix_cors::Cors;
 use actix_multipart::form::MultipartFormConfig;
+use actix_web::middleware::from_fn;
 use actix_web::{middleware::Logger, web, App, HttpResponse, HttpServer};
 use env_logger::Env;
 
@@ -23,10 +26,12 @@ fn config(cfg: &mut web::ServiceConfig) {
 
 fn api_config(cfg: &mut web::ServiceConfig) {
     cfg.service(
-        web::scope("/api")
-            .service(signup)
-            .service(login)
-            .service(web::scope("/record").service(upload).service(create_link)),
+        web::scope("/api").service(signup).service(login).service(
+            web::scope("/record")
+                .wrap(from_fn(auth_middleware))
+                .service(upload)
+                .service(create_link),
+        ),
     );
 }
 
@@ -50,7 +55,10 @@ async fn start() -> std::io::Result<()> {
             .app_data(MultipartFormConfig::default().total_limit(100 * 1024 * 1024))
             .app_data(web::Data::new(awc::Client::default()))
     })
-    .bind((env.host.unwrap_or("127.0.0.1".to_string()).as_str(), env.port.unwrap_or(3000u16)))?
+    .bind((
+        env.host.unwrap_or("127.0.0.1".to_string()).as_str(),
+        env.port.unwrap_or(3000u16),
+    ))?
     .run()
     .await
 }
