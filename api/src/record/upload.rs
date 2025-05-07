@@ -4,14 +4,12 @@ use crate::utils::get_user_id_from_cookie;
 use actix_multipart::form::{tempfile::TempFile, text::Text, MultipartForm};
 use actix_web::{error, post, web, HttpRequest, HttpResponse, Responder};
 use aws_sdk_s3::primitives::{ByteStream, SdkBody};
-use base64::prelude::BASE64_STANDARD;
-use base64::Engine;
+use base64::{prelude::BASE64_STANDARD, Engine};
 use chrono::Utc;
-use entity::prelude::Record;
 use entity::record;
 use k_snowflake::create_snowflake;
+use sea_orm::ActiveModelTrait;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{EntityTrait, TryIntoModel};
 use std::io::Read;
 use url::Url;
 
@@ -100,14 +98,10 @@ pub async fn upload(
         ..Default::default()
     };
 
-    Record::insert(record.clone())
-        .exec(&state.conn)
+    let record = record
+        .insert(&state.conn)
         .await
         .map_err(|_| error::ErrorInternalServerError("Error during database insert"))?;
 
-    Ok(
-        HttpResponse::Ok().json(record.try_into_model().map_err(|_| {
-            error::ErrorInternalServerError("Error generating response, but file writed")
-        })?),
-    )
+    Ok(HttpResponse::Ok().json(record))
 }

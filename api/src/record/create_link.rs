@@ -3,11 +3,10 @@ use crate::types::AppState;
 use crate::utils::get_user_id_from_cookie;
 use actix_web::{error, post, web, HttpRequest, HttpResponse, Responder};
 use chrono::Utc;
-use entity::prelude::Record;
 use entity::record;
 use k_snowflake::create_snowflake;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{EntityTrait, TryIntoModel};
+use sea_orm::ActiveModelTrait;
 use serde::Deserialize;
 use serde_json::json;
 use url::Url;
@@ -52,15 +51,11 @@ pub async fn create_link(
         url: Set(url),
         ..Default::default()
     };
-    let start = std::time::Instant::now();
-    Record::insert(record.clone())
-        .exec(&state.conn)
+
+    let record = record
+        .insert(&state.conn)
         .await
         .map_err(|_| error::ErrorInternalServerError("Error during database insert"))?;
-    println!("Insert time: {:?}", start.elapsed());
-    Ok(
-        HttpResponse::Ok().json(record.try_into_model().map_err(|_| {
-            error::ErrorInternalServerError("Error generating response, but file writed")
-        })?),
-    )
+
+    Ok(HttpResponse::Ok().json(record))
 }

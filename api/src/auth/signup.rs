@@ -8,7 +8,7 @@ use entity::prelude::User;
 use entity::user;
 use k_snowflake::create_snowflake;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -40,11 +40,12 @@ pub async fn signup(
         display_name: Set(payload.username.clone()),
         created_at: Set(Utc::now().naive_utc()),
         password: Set(password_hash),
+        ..Default::default()
     };
-    User::insert(user.clone()).exec(&state.conn).await.unwrap();
+    let user = user.insert(&state.conn).await.unwrap();
 
     // create token
-    let Ok(token) = create_token(user.id.unwrap(), &state.env.secret) else {
+    let Ok(token) = create_token(user.id, &state.env.secret) else {
         return HttpResponse::InternalServerError().body("Could not create token");
     };
 
