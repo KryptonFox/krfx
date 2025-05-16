@@ -1,12 +1,12 @@
-use crate::record::name::{generate_name, validate_name};
+use crate::record::name::match_name;
 use crate::types::AppState;
 use crate::utils::get_user_id_from_cookie;
 use actix_web::{error, post, web, HttpRequest, HttpResponse, Responder};
 use chrono::Utc;
 use entity::record;
 use k_snowflake::create_snowflake;
-use sea_orm::ActiveValue::Set;
 use sea_orm::ActiveModelTrait;
+use sea_orm::ActiveValue::Set;
 use serde::Deserialize;
 use serde_json::json;
 use url::Url;
@@ -21,13 +21,11 @@ struct CreateLinkPayload {
 pub async fn create_link(
     state: web::Data<AppState>,
     payload: web::Json<CreateLinkPayload>,
+    // user_type: UserType,
     req: HttpRequest,
 ) -> error::Result<impl Responder> {
     // validate or generate name
-    let name = match &payload.name {
-        Some(name) => validate_name(&state.conn, name.to_string()).await?,
-        None => generate_name(&state.conn).await,
-    };
+    let name = match_name(&state.conn, &payload.name).await?;
     // validate URL
     let url = match Url::parse(&payload.url) {
         Ok(url) => url.to_string(),

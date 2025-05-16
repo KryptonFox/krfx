@@ -17,7 +17,17 @@ static CHARSET: Lazy<Vec<&str>> = Lazy::new(|| {
 
 static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[0-9a-zA-Z._\-]+$").unwrap());
 
-pub async fn validate_name(conn: &DatabaseConnection, name: String) -> Result<String, NameError> {
+pub async fn match_name(
+    conn: &DatabaseConnection,
+    name: &Option<String>,
+) -> Result<String, NameError> {
+    match name {
+        Some(name) => validate_name(conn, name.clone()).await,
+        None => Ok(generate_name(conn).await),
+    }
+}
+
+async fn validate_name(conn: &DatabaseConnection, name: String) -> Result<String, NameError> {
     if name == "" {
         return Ok(generate_name(conn).await);
     };
@@ -33,7 +43,7 @@ pub async fn validate_name(conn: &DatabaseConnection, name: String) -> Result<St
     Ok(name)
 }
 
-pub async fn generate_name(conn: &DatabaseConnection) -> String {
+async fn generate_name(conn: &DatabaseConnection) -> String {
     let mut name = gen();
     while name_is_used(conn, &name).await {
         name = gen();

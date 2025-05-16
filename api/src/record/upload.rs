@@ -1,4 +1,4 @@
-use crate::record::name::{generate_name, validate_name};
+use crate::record::name::match_name;
 use crate::types::AppState;
 use crate::utils::get_user_id_from_cookie;
 use actix_multipart::form::{tempfile::TempFile, text::Text, MultipartForm};
@@ -27,10 +27,7 @@ pub async fn upload(
     req: HttpRequest,
 ) -> error::Result<impl Responder> {
     // validate or generate name
-    let name = match form.name {
-        Some(name) => validate_name(&state.conn, name.to_string()).await?,
-        None => generate_name(&state.conn).await,
-    };
+    let name = match_name(&state.conn, &form.name.and_then(|s| Some(s.to_string()))).await?;
     // set owner id if user authorized else record will be anonymous
     let owner_id = get_user_id_from_cookie(&req, &state);
 
@@ -38,7 +35,8 @@ pub async fn upload(
     let mut file = form.file.file.into_file();
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
-    let file = ByteStream::new(SdkBody::from(buffer.clone()));
+    let digest = md5::compute(&buffer);
+    let file = ByteStream::new(SdkBody::from(buffer));
 
     // file meta
     let mime_type = form.file.content_type.map(|mime| mime.to_string());
@@ -46,7 +44,6 @@ pub async fn upload(
         .file
         .file_name
         .and_then(|name| name.split(".").last().map(|ext| ext.to_string()));
-    let digest = md5::compute(buffer.clone());
 
     // upload
     let config = aws_config::load_from_env().await;
@@ -57,13 +54,13 @@ pub async fn upload(
         .key(format!(
             "{}.{}",
             name.to_lowercase(),
-            file_ext.clone().unwrap_or_else(|| "txt".to_string())
+            file_ext.clone().unwrap_or("txt".to_string())
         ))
         .body(file)
         .content_type(
             mime_type
                 .clone()
-                .unwrap_or_else(|| "application/octet-stream".to_string()),
+                .unwrap_or("application/octet-stream".to_string()),
         )
         .content_md5(BASE64_STANDARD.encode(digest.as_ref()))
         .content_disposition("inline")
@@ -78,7 +75,7 @@ pub async fn upload(
     let cdn_url = Url::parse(&state.env.cdn_url).expect("Invalid cdn url in env");
     let file_url = cdn_url
         .join(
-            format!("{}.{}", name, file_ext.unwrap_or_else(|| "txt".to_string()))
+            format!("{}.{}", name, file_ext.unwrap_or("txt".to_string()))
                 .to_lowercase()
                 .as_str(),
         )
