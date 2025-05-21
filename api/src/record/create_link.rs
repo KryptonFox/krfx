@@ -1,7 +1,6 @@
 use crate::record::name::match_name;
-use crate::types::AppState;
-use crate::utils::get_user_id_from_cookie;
-use actix_web::{error, post, web, HttpRequest, HttpResponse, Responder};
+use crate::types::{AppState, UserType};
+use actix_web::{error, post, web, HttpResponse, Responder};
 use chrono::Utc;
 use entity::record;
 use k_snowflake::create_snowflake;
@@ -21,8 +20,7 @@ struct CreateLinkPayload {
 pub async fn create_link(
     state: web::Data<AppState>,
     payload: web::Json<CreateLinkPayload>,
-    // user_type: UserType,
-    req: HttpRequest,
+    user_type: UserType,
 ) -> error::Result<impl Responder> {
     // validate or generate name
     let name = match_name(&state.conn, &payload.name).await?;
@@ -37,7 +35,10 @@ pub async fn create_link(
         }
     };
     // set owner id if user authorized else record will be anonymous
-    let owner_id = get_user_id_from_cookie(&req, &state);
+    let owner_id = match user_type {
+        UserType::None => None,
+        UserType::Admin(owner_id) | UserType::User(owner_id) => Some(owner_id),
+    };
 
     // write to database
     let record = record::ActiveModel {
