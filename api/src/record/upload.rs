@@ -27,7 +27,7 @@ pub async fn upload(
     req: HttpRequest,
 ) -> error::Result<impl Responder> {
     // validate or generate name
-    let name = match_name(&state.conn, &form.name.and_then(|s| Some(s.to_string()))).await?;
+    let name = match_name(&state.conn, &form.name.map(|s| s.to_string())).await?;
     // set owner id if user authorized else record will be anonymous
     let owner_id = get_user_id_from_cookie(&req, &state);
 
