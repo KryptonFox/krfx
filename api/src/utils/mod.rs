@@ -1,7 +1,8 @@
+use crate::state::AppState;
+use crate::types::JwtPayload;
 use actix_web::{web, HttpRequest};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use sha2::{Digest, Sha256};
-use crate::types::{AppState, JwtPayload};
 
 pub fn get_user_id_from_cookie(req: &HttpRequest, state: &web::Data<AppState>) -> Option<i64> {
     req.cookie("token")
@@ -11,7 +12,7 @@ pub fn get_user_id_from_cookie(req: &HttpRequest, state: &web::Data<AppState>) -
                 &DecodingKey::from_secret(state.env.secret.as_bytes()),
                 &Validation::default(),
             )
-                .ok()
+            .ok()
         })
         .map(|token| token.claims.user_id)
 }

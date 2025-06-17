@@ -2,11 +2,11 @@
 members = [".", "api", "entity", "migration"]
 
 [workspace.package]
-version = "3.0.0"
+version = "3.1.0"
 
 [package]
 name = "krfx-rust"
-version = "3.0.0"
+version = "3.1.0"
 description = "The API for krfx.ru project based on rust"
 edition = "2021"
 

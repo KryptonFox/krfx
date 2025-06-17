@@ -1,4 +1,5 @@
-use crate::types::{AppState, UserType};
+use crate::state::AppState;
+use crate::types::UserType;
 use crate::utils::get_user_id_from_cookie;
 use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::middleware::Next;
@@ -13,14 +14,14 @@ pub async fn auth_middleware(
     next: Next<impl MessageBody>,
 ) -> Result<ServiceResponse<impl MessageBody>, Error> {
     req.extensions_mut().insert(UserType::None);
-    
+
     let state = req
         .extract::<web::Data<AppState>>()
         .await
         .map_err(error::ErrorInternalServerError)?;
-    
+
     let user_id = get_user_id_from_cookie(req.request(), &state);
-    
+
     match user_id {
         None => next.call(req).await,
         Some(user_id) => {
