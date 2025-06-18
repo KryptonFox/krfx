@@ -9,16 +9,10 @@ pub async fn delete_handler(
     user_type: UserType,
 ) -> error::Result<HttpResponse> {
     let record_id = path.0;
+
     match user_type {
         UserType::None => Err(error::ErrorUnauthorized("Unauthorized")),
-        UserType::Admin(_) => {
-            let result = record_service.delete_by_id(record_id).await?;
-            if result.rows_affected == 0 {
-                Ok(HttpResponse::NotModified().finish())
-            } else {
-                Ok(HttpResponse::Ok().finish())
-            }
-        }
+        UserType::Admin(_) => Ok(()),
         UserType::User(id) => {
             // find owner of record
             let owner_id = record_service
@@ -29,16 +23,19 @@ pub async fn delete_handler(
                 .ok_or(error::ErrorForbidden("Record is anonymous"))?;
 
             // check the record belongs to user
-            if owner_id == id {
-                let result = record_service.delete_by_id(record_id).await?;
-                if result.rows_affected == 0 {
-                    Ok(HttpResponse::NotModified().finish())
-                } else {
-                    Ok(HttpResponse::Ok().finish())
-                }
+            if owner_id != id {
+                Err(error::ErrorForbidden("This is not your record"))
             } else {
-                Ok(HttpResponse::Forbidden().body("This is not your record"))
+                Ok(())
             }
         }
+    }?;
+
+    let delete_result = record_service.delete_by_id(record_id).await?;
+
+    if delete_result.rows_affected == 0 {
+        Ok(HttpResponse::NotModified().finish())
+    } else {
+        Ok(HttpResponse::Ok().finish())
     }
 }

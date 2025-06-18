@@ -13,9 +13,9 @@ use entity::record;
 use k_snowflake::create_snowflake;
 use md5::Digest;
 use sea_orm::ActiveValue::Set;
-use sea_orm::QueryFilter;
 use sea_orm::{ActiveModelTrait, EntityTrait};
 use sea_orm::{ColumnTrait, DeleteResult};
+use sea_orm::{ModelTrait, QueryFilter};
 use std::io::Read;
 use std::sync::Arc;
 use url::Url;
@@ -52,8 +52,27 @@ impl RecordService {
     }
 
     pub async fn delete_by_id(&self, id: i64) -> error::Result<DeleteResult> {
-        Record::delete_by_id(id)
-            .exec(&self.app_state.conn)
+        // find record to delete
+        let record = self
+            .find_record_by_id(id)
+            .await?
+            .ok_or(error::ErrorNotFound("Record not found"))?;
+
+        // if is file -> delete file
+        if record.is_file {
+            let url = Url::parse(record.url.as_str()).map_err(error::ErrorInternalServerError)?;
+
+            let key = url
+                .path_segments()
+                .and_then(|segments| segments.last())
+                .ok_or(error::ErrorInternalServerError("Wrong file URL"))?;
+
+            self.delete_file(key).await?;
+        }
+        
+        // delete and return
+        record
+            .delete(&self.app_state.conn)
             .await
             .map_err(error::ErrorInternalServerError)
     }
@@ -132,6 +151,18 @@ impl RecordService {
             .insert(&self.app_state.conn)
             .await
             .map_err(error::ErrorInternalServerError)
+    }
+
+    async fn delete_file(&self, key: &str) -> error::Result<()> {
+        self.s3_client
+            .delete_object()
+            .bucket(&self.app_state.env.bucket_name)
+            .key(key)
+            .send()
+            .await
+            .map_err(error::ErrorInternalServerError)?;
+
+        Ok(())
     }
 
     async fn upload_file_to_sdk(
