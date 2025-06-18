@@ -76,7 +76,7 @@ impl AuthService {
     }
 
     fn create_auth_token(&self, user_id: i64) -> jsonwebtoken::errors::Result<String> {
-        let secret = &self.app_state.env.salt;
+        let secret = &self.app_state.env.secret;
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -98,7 +98,7 @@ impl AuthService {
         Cookie::build("token", token)
             .secure(true)
             .http_only(true)
+            .path("/api")
             .finish()
-            .to_owned()
     }
 }
