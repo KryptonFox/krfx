@@ -13,9 +13,9 @@ use entity::record;
 use k_snowflake::create_snowflake;
 use md5::Digest;
 use sea_orm::ActiveValue::Set;
-use sea_orm::ColumnTrait;
 use sea_orm::QueryFilter;
 use sea_orm::{ActiveModelTrait, EntityTrait};
+use sea_orm::{ColumnTrait, DeleteResult};
 use std::io::Read;
 use std::sync::Arc;
 use url::Url;
@@ -35,10 +35,25 @@ impl RecordService {
         }
     }
 
+    pub async fn find_record_by_id(&self, id: i64) -> error::Result<Option<record::Model>> {
+        Record::find()
+            .filter(record::Column::Id.eq(id))
+            .one(&self.app_state.conn)
+            .await
+            .map_err(error::ErrorInternalServerError)
+    }
+
     pub async fn find_record_by_name(&self, name: &String) -> error::Result<Option<record::Model>> {
         Record::find()
             .filter(record::Column::Name.eq(name.to_lowercase()))
             .one(&self.app_state.conn)
+            .await
+            .map_err(error::ErrorInternalServerError)
+    }
+
+    pub async fn delete_by_id(&self, id: i64) -> error::Result<DeleteResult> {
+        Record::delete_by_id(id)
+            .exec(&self.app_state.conn)
             .await
             .map_err(error::ErrorInternalServerError)
     }

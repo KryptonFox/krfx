@@ -4,6 +4,7 @@ use crate::handlers::api::auth::signup::signup_handler;
 use crate::handlers::api::record::create_link::create_link_handler;
 use crate::handlers::api::record::upload_file::upload_file_handler;
 use actix_web::web;
+use crate::handlers::api::record::delete::delete_handler;
 use crate::middlewares::auth_middleware;
 
 pub(super) fn configure_api_routes(cfg: &mut web::ServiceConfig) {
@@ -16,6 +17,7 @@ pub(super) fn configure_api_routes(cfg: &mut web::ServiceConfig) {
         web::scope("/record")
             .wrap(from_fn(auth_middleware))
             .service(create_link_handler)
-            .service(upload_file_handler),
+            .service(upload_file_handler)
+            .service(delete_handler),
     );
 }
