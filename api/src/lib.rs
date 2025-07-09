@@ -7,6 +7,7 @@ mod services;
 mod state;
 mod types;
 mod utils;
+mod extractors;
 
 use crate::routes::configure_routes;
 use crate::services::{AuthService, NameService, RecordService};

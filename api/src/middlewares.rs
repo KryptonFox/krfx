@@ -1,5 +1,5 @@
 use crate::state::AppState;
-use crate::types::{JwtPayload, UserType};
+use crate::types::{JwtPayload, OptionalUser};
 use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::middleware::Next;
 use actix_web::{error, web, Error, HttpMessage};
@@ -13,7 +13,7 @@ pub async fn auth_middleware(
     mut req: ServiceRequest,
     next: Next<impl MessageBody>,
 ) -> Result<ServiceResponse<impl MessageBody>, Error> {
-    req.extensions_mut().insert(UserType::None);
+    req.extensions_mut().insert::<OptionalUser>(None);
 
     let state = req
         .extract::<web::Data<AppState>>()
@@ -34,24 +34,16 @@ pub async fn auth_middleware(
 
     match user_id {
         Some(user_id) => {
-            if let Some(user_type) = User::find()
-                .filter(user::Column::Id.eq(user_id))
-                .one(&state.conn)
-                .await
-                .map_err(error::ErrorInternalServerError)?
-                .map(|user| {
-                    if user.is_admin {
-                        UserType::Admin(user.id)
-                    } else {
-                        UserType::User(user.id)
-                    }
-                })
-            {
-                req.extensions_mut().insert(user_type);
-            }
-
-            next.call(req).await
+            req.extensions_mut().insert::<OptionalUser>(
+                User::find()
+                    .filter(user::Column::Id.eq(user_id))
+                    .one(&state.conn)
+                    .await
+                    .map_err(error::ErrorInternalServerError)?,
+            );
         }
-        None => next.call(req).await,
+        _ => (),
     }
+    
+    next.call(req).await
 }

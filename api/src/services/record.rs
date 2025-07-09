@@ -1,7 +1,6 @@
 use crate::errors::{RecordRequestError, RecordRequestErrorType};
 use crate::services::name::NameService;
 use crate::state::AppState;
-use crate::types::UserType;
 use actix_multipart::form::tempfile::TempFile;
 use actix_web::{error, web};
 use aws_sdk_s3::primitives::{ByteStream, SdkBody};
@@ -80,7 +79,7 @@ impl RecordService {
     pub async fn create_link(
         &self,
         name_service: web::Data<NameService>,
-        user_type: UserType,
+        owner_id: Option<i64>,
         url: &String,
         name: &Option<String>,
     ) -> error::Result<record::Model> {
@@ -91,12 +90,6 @@ impl RecordService {
             .map_err(|_| {
                 RecordRequestError::new(RecordRequestErrorType::Url, "Invalid URL".to_string())
             })?;
-
-        // set owner id if user authorized else record will be anonymous
-        let owner_id = match user_type {
-            UserType::None => None,
-            UserType::Admin(owner_id) | UserType::User(owner_id) => Some(owner_id),
-        };
 
         // write to database
         let record = record::ActiveModel {
@@ -119,18 +112,11 @@ impl RecordService {
     pub async fn upload_file(
         &self,
         name_service: web::Data<NameService>,
-        user_type: UserType,
+        owner_id: Option<i64>,
         file: TempFile,
         name: &Option<String>,
     ) -> error::Result<record::Model> {
         let name = name_service.unwrap_name(name).await?;
-
-        // set owner id if user authorized else record will be anonymous
-        let owner_id = match user_type {
-            UserType::None => None,
-            UserType::Admin(owner_id) | UserType::User(owner_id) => Some(owner_id),
-        };
-
         let (file_url, digest, mime_type) = self.upload_file_to_sdk(file, &name).await?;
 
         // write to database

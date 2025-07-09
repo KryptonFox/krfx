@@ -1,5 +1,5 @@
+use crate::extractors::UserId;
 use crate::services::{NameService, RecordService};
-use crate::types::UserType;
 use actix_multipart::form::tempfile::TempFile;
 use actix_multipart::form::text::Text;
 use actix_multipart::form::MultipartForm;
@@ -17,14 +17,14 @@ pub async fn upload_file_handler(
     record_service: web::Data<RecordService>,
     name_service: web::Data<NameService>,
     MultipartForm(form): MultipartForm<UploadForm>,
-    user_type: UserType,
+    UserId(owner_id): UserId,
 ) -> error::Result<HttpResponse> {
     // convert multipart text to string
     let name = form.name.map(|n| n.to_string());
 
     //
     let record = record_service
-        .upload_file(name_service.clone(), user_type, form.file, &name)
+        .upload_file(name_service.clone(), owner_id, form.file, &name)
         .await?;
 
     Ok(HttpResponse::Ok().json(record))
