@@ -12,3 +12,8 @@ edition = "2021"
 
 [dependencies]
 api = { path = "api" }
+
+[features]
+#default = ["sqlite"]
+sqlite = ["api/sqlite"]
+postgres = ["api/postgres"]

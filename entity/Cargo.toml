@@ -4,6 +4,10 @@ version = { workspace = true }
 publish = false
 edition = "2021"
 
+[features]
+sqlite = ["sea-orm/sqlx-sqlite"]
+postgres = ["sea-orm/sqlx-postgres"]
+
 [dependencies]
-sea-orm = { version = "1.1", features = ["sqlx-sqlite"] }
+sea-orm = { version = "1.1" }
 serde = { version = "1.0", features = ["derive"] }

@@ -8,6 +8,10 @@ publish = false
 name = "migration"
 path = "src/lib.rs"
 
+[features]
+sqlite = ["sea-orm-migration/sqlx-sqlite"]
+postgres = ["sea-orm-migration/sqlx-postgres"]
+
 [dependencies]
 async-std = { version = "1", features = ["attributes", "tokio1"] }
 

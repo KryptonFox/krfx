@@ -2,7 +2,11 @@
 name = "api"
 edition = "2021"
 publish = false
-version = { workspace = true }
+version = { workspace = true } 
+
+[features]
+sqlite = ["sea-orm/sqlx-sqlite", "migration/sqlite", "entity/sqlite"]
+postgres = ["sea-orm/sqlx-postgres", "migration/postgres", "entity/postgres"]
 
 [dependencies]
 migration = { path = "../migration" }
@@ -11,7 +15,7 @@ entity = { path = "../entity" }
 dotenvy = "*"
 envy = "*"
 
-sea-orm = { version = "1.1", features = ["sqlx-sqlite", "runtime-actix-rustls"] }
+sea-orm = { version = "1.1", features = ["runtime-actix-rustls"] }
 
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0"
