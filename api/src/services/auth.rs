@@ -23,7 +23,7 @@ impl AuthService {
         Self { app_state }
     }
 
-    pub async fn login(&self, username: &String, password: &String) -> error::Result<Cookie> {
+    pub async fn login(&self, username: &String, password: &String) -> error::Result<Cookie<'_>> {
         // hash password
         let password_hash = string_hash_sha256(password.as_str(), &self.app_state.env.salt);
 
@@ -43,7 +43,7 @@ impl AuthService {
         Ok(Self::create_token_cookie(token))
     }
 
-    pub async fn signup(&self, username: &String, password: &String) -> error::Result<Cookie> {
+    pub async fn signup(&self, username: &String, password: &String) -> error::Result<Cookie<'_>> {
         // check if username exists in db
         if User::find()
             .filter(user::Column::Username.eq(username.to_lowercase().as_str()))
