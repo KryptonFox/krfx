@@ -5,6 +5,7 @@ use entity::user;
 use std::future::Future;
 use std::pin::Pin;
 
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub enum UserType {
     User(user::Model),
