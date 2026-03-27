@@ -1,6 +1,6 @@
 use crate::state::AppState;
 use crate::types::JwtPayload;
-use crate::utils::string_hash_sha256;
+use crate::utils::hash_password;
 use actix_web::cookie::Cookie;
 use actix_web::error;
 use chrono::Utc;
@@ -25,7 +25,7 @@ impl AuthService {
 
     pub async fn login(&self, username: &String, password: &String) -> error::Result<Cookie<'_>> {
         // hash password
-        let password_hash = string_hash_sha256(password.as_str(), &self.app_state.env.salt);
+        let password_hash = hash_password(password.as_str(), &self.app_state.env.salt);
 
         // find user
         let user = User::find()
@@ -55,7 +55,7 @@ impl AuthService {
             return Err(error::ErrorBadRequest("Username already exists"));
         }
         // hash password
-        let password_hash = string_hash_sha256(password.as_str(), &self.app_state.env.salt);
+        let password_hash = hash_password(password.as_str(), &self.app_state.env.salt);
 
         // write user in db
         let user = user::ActiveModel {

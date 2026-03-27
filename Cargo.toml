@@ -14,6 +14,5 @@ edition = "2021"
 api = { path = "api" }
 
 [features]
-#default = ["sqlite"]
 sqlite = ["api/sqlite"]
 postgres = ["api/postgres"]

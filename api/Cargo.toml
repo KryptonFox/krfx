@@ -24,7 +24,7 @@ actix-multipart = "0.7"
 actix-cors = "0.7"
 awc = { version = "3.6", features = ["rustls"] }
 
-jsonwebtoken = { version = "9", default-features = false }
+jsonwebtoken = { version = "10.3", default-features = false }
 k-snowflake = "2.1.1"
 chrono = "0.4"
 env_logger = "0.11"
@@ -32,11 +32,11 @@ fastrand = "2"
 url = "2.5"
 regex = "1"
 once_cell = "1.21"
-#derive_more = "2"
 
 base64 = "0.22"
-sha2 = "0.10"
-md5 = "0.7"
+sha2 = "0.11"
+hex = "0.4"
+md5 = "0.8"
 
 aws-config = { version = "1.6", features = ["behavior-version-latest"] }
 aws-sdk-s3 = "1.83.0"
